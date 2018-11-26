@@ -148,5 +148,5 @@ class NNetWrapper(NeuralNet):
         filepath = os.path.join(folder, filename)
         if not os.path.exists(filepath):
             raise("No model in path {}".format(filepath))
-        checkpoint = torch.load(filepath)
+        checkpoint = torch.load(filepath, map_location='cpu')
         self.nnet.load_state_dict(checkpoint['state_dict'])

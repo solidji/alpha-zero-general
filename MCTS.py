@@ -32,9 +32,11 @@ class MCTS():
             self.search(canonicalBoard)
 
         s = self.game.stringRepresentation(canonicalBoard)
+        # 返回S下每个A的模拟次数
         counts = [self.Nsa[(s,a)] if (s,a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
 
         if temp==0:
+            # 取模拟次数最多的为bestA
             bestA = np.argmax(counts)
             probs = [0]*len(counts)
             probs[bestA]=1
@@ -71,10 +73,12 @@ class MCTS():
             self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
         if self.Es[s]!=0:
             # terminal node
+            # 要么迭代到一局结束，并返回胜负+/-1作为V
             return -self.Es[s]
 
         if s not in self.Ps:
             # leaf node
+            # 要么迭代到拓展一次叶节点，即模拟一步未走过的动作，并采用当前神经网络预测值替代rollout
             self.Ps[s], v = self.nnet.predict(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[s] = self.Ps[s]*valids      # masking invalid moves
@@ -99,6 +103,8 @@ class MCTS():
         best_act = -1
 
         # pick the action with the highest upper confidence bound
+        # 通过已知状态S下的Q值表，加上S与A分别模拟过的次数，按以下统计公式计算置信度，并依此选择下一步动作来模拟
+        # U(s,a) = Q(s,a) + c_{puct}\cdot P(s,a)\cdot\frac{\sqrt{\Sigma_b N(s,b)}}{1+N(s,a)}
         for a in range(self.game.getActionSize()):
             if valids[a]:
                 if (s,a) in self.Qsa:
@@ -114,9 +120,11 @@ class MCTS():
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
         next_s = self.game.getCanonicalForm(next_s, next_player)
 
+        # 已经是之前模拟过的一步动作，则继续迭代
         v = self.search(next_s)
 
         if (s,a) in self.Qsa:
+            # 统计胜负次数在所有模拟中占的比例来更新Q表
             self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + v)/(self.Nsa[(s,a)]+1)
             self.Nsa[(s,a)] += 1
 
