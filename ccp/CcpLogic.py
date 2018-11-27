@@ -467,7 +467,7 @@ class Poker(object):
         self.actions_lookuptable = action_dict
 
     # 发牌
-    def game_init(self, players, playrecords, cards, train):
+    def game_init(self, players, playrecords, cards, train=True):
 
         if train:
             # 洗牌
@@ -497,7 +497,7 @@ class Poker(object):
             players[2].cards_left = playrecords.cards_left3 = p3_cards
 
     # 初始化
-    def game_start(self, train, RL=None):
+    def game_start(self, train=True, RL=None):
 
         # 初始化players
         self.players = []
@@ -517,7 +517,7 @@ class Poker(object):
         # return jsonpickle.encode(web_show, unpicklable=False)
         return web_show
 
-    # 返回下次出牌列表
+    # 返回当前出牌玩家i可选的下次出牌列表
     def get_next_moves(self):
         next_move_types, next_moves = self.players[self.i].get_moves(self.last_move_type, self.last_move,
                                                                      self.playrecords)
@@ -633,29 +633,29 @@ class PlayRecords(object):
     """
 
     def __init__(self):
-        # 当前手牌
+        # 每个玩家当前手牌
         self.cards_left1 = []
         self.cards_left2 = []
         self.cards_left3 = []
 
-        # 可能出牌选择
+        # 每个玩家每一手可能出牌组合的记录
         self.next_moves1 = []
         self.next_moves2 = []
         self.next_moves3 = []
 
-        # 出牌记录
+        # 每个玩家每一手出牌记录
         self.next_move1 = []
         self.next_move2 = []
         self.next_move3 = []
 
-        # 出牌记录
+        # 3个玩家整局牌的完整出牌记录
         self.records = []
 
         # 胜利者
         # winner=0,1,2,3 0表示未结束,1,2,3表示winner
         self.winner = 0
 
-        # 出牌者
+        # 当前出牌者
         self.player = 1
 
     # 展示
@@ -665,6 +665,14 @@ class PlayRecords(object):
         card_show(self.cards_left2, "player 2", 1)
         card_show(self.cards_left3, "player 3", 1)
         # card_show(self.records, "record", 3)
+
+    # 保存当前状态为np.array形态的上帝视角state
+    def save_to_state(self):
+        pass
+
+    # 从state中部分还原
+    def load_from_state(self):
+        pass
 
 
 ############################################
@@ -697,7 +705,7 @@ class Moves(object):
         # 下次出牌类型
         self.next_moves_type = []
 
-    # 获取全部出牌列表
+    # 获取全部出牌列表,赋值牌型信息
     def get_total_moves(self, cards_left):
 
         # 统计牌数量/顺序/王牌信息
@@ -883,7 +891,7 @@ class Player(object):
     player类
     """
 
-    def __init__(self, player_id, model, my_config, game=None, RL=None):
+    def __init__(self, player_id, model="random", my_config=None, game=None, RL=None):
         self.player_id = player_id
         self.cards_left = []
         # 出牌模式
