@@ -523,8 +523,14 @@ class Poker(object):
                                                                      self.playrecords)
         return next_move_types, next_moves
 
-    # 游戏进行
+
     def get_next_move(self, action):
+        '''
+        进行一局随机游戏，返回胜者ID
+
+        :param action:
+        :return:
+        '''
         while (self.i <= 2):
             if self.i != 0:
                 self.get_next_moves()
@@ -550,6 +556,12 @@ class Poker(object):
         return self.playrecords.winner, self.end
 
     def execute_move(self, action, player):
+        '''
+        在当前牌局情况下，选择action执行一步
+        :param action:
+        :param player:
+        :return:
+        '''
         # 需要补检查action是否valid，player是否0-2
         self.i = player
         self.last_move_type, self.last_move, self.end, self.yaobuqi = \
@@ -568,6 +580,86 @@ class Poker(object):
 
         return
 
+    def initFromRecords(self, playrecords):
+        '''
+        通过牌局记录恢复一个Poker类到当时的状态
+        '''
+
+        # 初始化扑克牌记录类
+        self.playrecords = playrecords
+        # 胜利者/当前出牌玩家
+        self.winner = playrecords.winner
+        self.i = playrecords.player
+
+        # 3个玩家剩余手牌
+        self.players[0].cards_left = playrecords.cards_left1
+        self.players[1].cards_left = playrecords.cards_left2
+        self.players[2].cards_left = playrecords.cards_left3
+
+        self.last_move = playrecords.records[-1]
+        self.last_move_type = playrecords.records[-1]
+
+        # 当前这一手可选的出牌组合
+        if len(playrecords.next_moves1) != 0:
+            self.next_moves = playrecords.next_moves1[-1]
+            self.next_moves1 = playrecords.next_moves1
+        if len(playrecords.next_moves2) != 0:
+            next_moves = playrecords.next_moves2[-1]
+            for move in next_moves:
+                cards = []
+                for card in move:
+                    cards.append(card.name + card.color)
+                self.next_moves2.append(cards)
+        if len(playrecords.next_moves3) != 0:
+            next_moves = playrecords.next_moves3[-1]
+            for move in next_moves:
+                cards = []
+                for card in move:
+                    cards.append(card.name + card.color)
+                self.next_moves3.append(cards)
+
+                # 出牌
+        self.next_move1 = []
+        if len(playrecords.next_move1) != 0:
+            next_move = playrecords.next_move1[-1]
+            if next_move in ["yaobuqi", "buyao"]:
+                self.next_move1.append(next_move)
+            else:
+                for card in next_move:
+                    self.next_move1.append(card.name + card.color)
+        self.next_move2 = []
+        if len(playrecords.next_move2) != 0:
+            next_move = playrecords.next_move2[-1]
+            if next_move in ["yaobuqi", "buyao"]:
+                self.next_move2.append(next_move)
+            else:
+                for card in next_move:
+                    self.next_move2.append(card.name + card.color)
+        self.next_move3 = []
+        if len(playrecords.next_move3) != 0:
+            next_move = playrecords.next_move3[-1]
+            if next_move in ["yaobuqi", "buyao"]:
+                self.next_move3.append(next_move)
+            else:
+                for card in next_move:
+                    self.next_move3.append(card.name + card.color)
+
+                    # 记录
+        self.records = []
+        for i in playrecords.records:
+            tmp = []
+            tmp.append(i[0])
+            tmp_name = []
+            # 处理要不起
+            try:
+                for j in i[1]:
+                    tmp_name.append(j.name + j.color)
+                tmp.append(tmp_name)
+            except:
+                tmp.append(i[1])
+            self.records.append(tmp)
+
+        return self
 ############################################
 #              扑克牌相关类                 #
 ############################################
@@ -951,11 +1043,26 @@ class Player(object):
         return self.next_move_types, self.next_moves
 
     # 出牌
-    def play(self, last_move_type, last_move, playrecords, action):
+    def play(self, last_move_type, last_move, playrecords, action=None):
+        '''
+        按给定action走一步，记录到records，判断是否结束，
+        没有给定action则随机走一步
+
+        :param last_move_type:
+        :param last_move:
+        :param playrecords:
+        :param action:
+        :return:
+        '''
         # 主动调用一下，初始化self.next_move_type
         self.get_moves(last_move_type, last_move, playrecords)
-        # 在next_moves中选择出牌方法
-        self.next_move_type, self.next_move = choose_random(next_move_types=self.next_move_types,
+        if action:
+            self.next_move = action
+            # self.next_move_type =
+
+        else:
+            # 在next_moves中选出一种出牌
+            self.next_move_type, self.next_move = choose_random(next_move_types=self.next_move_types,
                                                             next_moves=self.next_moves,
                                                             last_move_type=last_move_type)
         # 记录
@@ -1207,7 +1314,7 @@ if __name__ == "__main__":
         print(" -----------------------")
         # next_move_types, next_moves = g.get_next_moves()
         # actions = get_actions(next_moves, g)
-        winner, done = g.get_next_move(action="mcts")
+        winner, done = g.get_next_move(action=None)
         new_state = get_state(g.playrecords, g.players[0])
 
     print(" -----------------------")

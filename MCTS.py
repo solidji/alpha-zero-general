@@ -78,7 +78,7 @@ class MCTS():
 
         if s not in self.Ps:
             # leaf node
-            # 要么迭代到拓展一次叶节点，即模拟一步未走过的动作，并采用当前神经网络预测值替代rollout
+            # 要么迭代到拓展一次叶节点，即模拟一步未走过的动作，并采用当前神经网络预测值替代rollout,返回预测的胜负
             self.Ps[s], v = self.nnet.predict(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[s] = self.Ps[s]*valids      # masking invalid moves
