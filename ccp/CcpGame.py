@@ -64,6 +64,7 @@ class CcpGame(Game):
     def stringRepresentation(self, board):
         # 为某个状态生成一个对应字符key
         # 这里的状态应该只包括当前玩家可见状态
-        state = get_state(board, board.player)
+        state = board.save_to_state()
+        # state = get_state(board, board.player)
         return state.tostring()
 

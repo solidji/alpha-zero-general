@@ -182,15 +182,15 @@ class Poker(object):
             self.last_move = playrecords.records[0][2]
             self.last_move_type = playrecords.records[0][1]
         elif len(playrecords.records) == 2: # 打了两手牌
-            if playrecords.records[1][1] == ("yaobuqi" or "buyao"):
+            if playrecords.records[1][1] == "yaobuqi" or playrecords.records[1][1] == "buyao":
                 self.last_move_type = playrecords.records[0][1]
                 self.last_move = playrecords.records[0][2]
             else:
                 self.last_move_type = playrecords.records[1][1]
                 self.last_move = playrecords.records[1][2]
         elif len(playrecords.records) > 2: # 至少打了一轮牌
-            if playrecords.records[-1][1] == ("yaobuqi" or "buyao"): # 上家不要
-                if playrecords.records[-2][1] == ("yaobuqi" or "buyao"): # 上上家也不要
+            if playrecords.records[-1][1] == "yaobuqi" or playrecords.records[-1][1] == "buyao": # 上家不要
+                if playrecords.records[-2][1] == "yaobuqi" or playrecords.records[-2][1] == "buyao": # 上上家也不要
                     self.last_move_type = self.last_move = "start"
                 else:
                     self.last_move_type = playrecords.records[-2][1] # 上家不要但上上家要了
@@ -598,7 +598,8 @@ class Player(object):
         '''
         # 主动调用一下，初始化self.next_move_types, self.next_moves
         self.get_moves(last_move_type, last_move, playrecords)
-        if action:
+        print(self.player_id, action)
+        if action != None:
             if action == 429:
                 self.next_move_type = self.next_move = "buyao"
             elif action == 430:
@@ -738,33 +739,92 @@ def get_state(playrecords, player):
     '''
     state = np.zeros((6, 15), dtype=int)
 
-    for i in playrecords.cards_left1:
-        state[0][i.rank - 1] += 1
-    for cards in playrecords.next_move1:
-        if cards in ["buyao", "yaobuqi"]:
-            continue
-        for card in cards:
-            state[1][card.rank - 1] += 1
-    for cards in playrecords.next_move2:
-        if cards in ["buyao", "yaobuqi"]:
-            continue
-        for card in cards:
-            state[2][card.rank - 1] += 1
-    for cards in playrecords.next_move3:
-        if cards in ["buyao", "yaobuqi"]:
-            continue
-        for card in cards:
-            state[3][card.rank - 1] += 1
-    if playrecords.next_move2:
-        cards = playrecords.next_move2[-1]
-        if cards not in ["buyao", "yaobuqi"]:
+    if player == 1:
+        for i in playrecords.cards_left1:
+            state[0][i.rank - 1] += 1
+        for cards in playrecords.next_move1:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
             for card in cards:
-                state[4][card.rank - 1] += 1
-    if playrecords.next_move3:
-        cards = playrecords.next_move3[-1]
-        if cards not in ["buyao", "yaobuqi"]:
+                state[1][card.rank - 1] += 1
+        for cards in playrecords.next_move2:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
             for card in cards:
-                state[5][card.rank - 1] += 1
+                state[2][card.rank - 1] += 1
+        for cards in playrecords.next_move3:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
+            for card in cards:
+                state[3][card.rank - 1] += 1
+        if playrecords.next_move2:
+            cards = playrecords.next_move2[-1]
+            if cards not in ["buyao", "yaobuqi"]:
+                for card in cards:
+                    state[4][card.rank - 1] += 1
+        if playrecords.next_move3:
+            cards = playrecords.next_move3[-1]
+            if cards not in ["buyao", "yaobuqi"]:
+                for card in cards:
+                    state[5][card.rank - 1] += 1
+
+    elif player == 2:
+        for i in playrecords.cards_left2:
+            state[0][i.rank - 1] += 1
+        for cards in playrecords.next_move2:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
+            for card in cards:
+                state[1][card.rank - 1] += 1
+        for cards in playrecords.next_move3:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
+            for card in cards:
+                state[2][card.rank - 1] += 1
+        for cards in playrecords.next_move1:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
+            for card in cards:
+                state[3][card.rank - 1] += 1
+        if playrecords.next_move3:
+            cards = playrecords.next_move3[-1]
+            if cards not in ["buyao", "yaobuqi"]:
+                for card in cards:
+                    state[4][card.rank - 1] += 1
+        if playrecords.next_move1:
+            cards = playrecords.next_move1[-1]
+            if cards not in ["buyao", "yaobuqi"]:
+                for card in cards:
+                    state[5][card.rank - 1] += 1
+
+    elif player == 3:
+        for i in playrecords.cards_left3:
+            state[0][i.rank - 1] += 1
+        for cards in playrecords.next_move3:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
+            for card in cards:
+                state[1][card.rank - 1] += 1
+        for cards in playrecords.next_move1:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
+            for card in cards:
+                state[2][card.rank - 1] += 1
+        for cards in playrecords.next_move2:
+            if cards in ["buyao", "yaobuqi"]:
+                continue
+            for card in cards:
+                state[3][card.rank - 1] += 1
+        if playrecords.next_move1:
+            cards = playrecords.next_move1[-1]
+            if cards not in ["buyao", "yaobuqi"]:
+                for card in cards:
+                    state[4][card.rank - 1] += 1
+        if playrecords.next_move2:
+            cards = playrecords.next_move2[-1]
+            if cards not in ["buyao", "yaobuqi"]:
+                for card in cards:
+                    state[5][card.rank - 1] += 1
     #
     # # 手牌
     # if player == 1:
