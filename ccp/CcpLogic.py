@@ -16,7 +16,7 @@ from ccp.actions import action_dict
 ############################################
 class Poker(object):
 
-    def __init__(self, models=["random", "random", "random"], my_config=None):
+    def __init__(self, my_config=None):
         # 初始化一副扑克牌类
         self.cards = Cards()
 
@@ -28,13 +28,24 @@ class Poker(object):
         self.yaobuqis = []
 
         # choose模型
-        self.models = models
+        self.models = ["random", "random", "random"]
 
         self.my_config = my_config
         self.actions_lookuptable = action_dict
 
+        # 初始化players
+        self.players = []
+        self.players.append(Player(1, game=self))
+        self.players.append(Player(2, game=self))
+        self.players.append(Player(3, game=self))
+        # self.players.append(Player(3, self.models[2], self.my_config, self, RL))
+
+        # 初始化扑克牌记录类
+        self.playrecords = PlayRecords()
+
+
     # 发牌
-    def game_init(self, players, playrecords, cards, train=True):
+    def game_start(self, players, playrecords, cards, train=True):
 
         if train:
             # 洗牌
@@ -63,20 +74,6 @@ class Poker(object):
             players[1].cards_left = playrecords.cards_left2 = p2_cards
             players[2].cards_left = playrecords.cards_left3 = p3_cards
 
-    # 初始化
-    def game_start(self, train=True, RL=None):
-
-        # 初始化players
-        self.players = []
-        self.players.append(Player(1, self.models[0], self.my_config, self, RL))
-        self.players.append(Player(2, self.models[1], self.my_config, self, RL))
-        self.players.append(Player(3, self.models[2], self.my_config, self, RL))
-
-        # 初始化扑克牌记录类
-        self.playrecords = PlayRecords()
-
-        # 发牌
-        self.game_init(self.players, self.playrecords, self.cards, train)
 
     # 返回扑克牌记录类
     def get_record(self):
@@ -115,7 +112,7 @@ class Poker(object):
             if self.end:
                 self.playrecords.winner = self.i + 1
                 break
-            self.i = self.i + 1
+            self.i = (self.i + 1) % 3
         # 一轮结束
         self.playround = self.playround + 1
         self.i = 0
@@ -145,7 +142,7 @@ class Poker(object):
         #     else:
         #         return action[0][action[2]], action[1][action[2]]
 
-        self.i = player
+        # self.i = self.playrecords.player
         self.last_move_type, self.last_move, self.end, self.yaobuqi = \
             self.players[self.i].play(self.last_move_type, self.last_move, self.playrecords, action)
         if self.yaobuqi:
@@ -158,7 +155,7 @@ class Poker(object):
             self.last_move_type = self.last_move = "start"
         if self.end:
             self.playrecords.winner = self.i + 1
-        self.i = self.i + 1
+        self.i = (self.i + 1) % 3
 
         return self.playrecords.winner, self.end
 
@@ -171,7 +168,7 @@ class Poker(object):
         self.playrecords = playrecords
         # 胜利者/当前出牌玩家,ps: self.i从0开始，player从1开始
         self.winner = playrecords.winner
-        self.i = playrecords.player
+        self.i = playrecords.player % 3
 
         # 3个玩家剩余手牌
         self.players[0].cards_left = playrecords.cards_left1
@@ -303,7 +300,8 @@ class PlayRecords(object):
 
     # 保存当前状态为np.array形态的上帝视角state
     def save_to_state(self):
-        pass
+        i = self.player % 3 + 1
+        return get_state(self, i)
 
     # 从state中部分还原
     def load_from_state(self):
@@ -555,7 +553,7 @@ class Player(object):
             playrecords.records.append([self.player_id, self.next_move_type, self.next_move])
             for i in self.next_move:
                 self.cards_left.remove(i)
-                # 同步playrecords
+        # 同步playrecords
         if self.player_id == 1:
             playrecords.cards_left1 = self.cards_left
             playrecords.next_moves1.append(self.next_moves) #yaobuqi的时候next_moves与tpyes为空list[]，buyao的时候不为空但不包括'buyao'
@@ -598,11 +596,23 @@ class Player(object):
         :param action:
         :return:
         '''
-        # 主动调用一下，初始化self.next_move_type
+        # 主动调用一下，初始化self.next_move_types, self.next_moves
         self.get_moves(last_move_type, last_move, playrecords)
         if action:
-            self.next_move = action
-            # self.next_move_type =
+            if action == 429:
+                self.next_move_type = self.next_move = "buyao"
+            elif action == 430:
+                self.next_move_type = self.next_move = "yaobuqi"
+            else:
+                actions = get_actions(self.next_moves, False)
+                print(action, actions)
+                for a in actions:
+                    if a == action:
+                        self.next_move = self.next_moves[actions.index(a)]
+                        self.next_move_type = self.next_move_types[actions.index(a)]
+                        break
+
+            # self.next_move_type, self.next_move = get_move(action)
 
         else:
             # 在next_moves中选出一种出牌
@@ -784,7 +794,7 @@ def get_state(playrecords, player):
     return state
 
 
-def get_actions(next_moves, game):
+def get_actions(next_moves, bStart):
     """
     0-14: 单出， 1-13，小王，大王
     15-27: 对，1-13
@@ -809,11 +819,26 @@ def get_actions(next_moves, game):
     if len(actions) == 0:
         actions.append(430)
     # buyao
-    elif game.last_move != "start":
+    elif bStart:
         actions.append(429)
 
     return actions
 
+def get_move(action):
+    actions_lookuptable = action_dict
+
+    if action == 429:
+        next_move_type = next_move = "buyao"
+    elif action == 430:
+        next_move_type = next_move = "yaobuqi"
+    else:
+        for k, v in actions_lookuptable.items():
+            if(v == action):
+                print(k)
+        next_move = action
+        next_move_type = action
+
+    return next_move_type, next_move
 
 # 结合state和可以出的actions作为新的state
 def combine(s, a):
