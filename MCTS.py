@@ -66,7 +66,7 @@ class MCTS():
         Returns:
             v: the negative of the value of the current canonicalBoard
         """
-
+        player_id = canonicalBoard.player
         s = self.game.stringRepresentation(canonicalBoard)
 
         if s not in self.Es:
@@ -74,7 +74,8 @@ class MCTS():
         if self.Es[s]!=0:
             # terminal node
             # 要么迭代到一局结束，并返回胜负+/-1作为V
-            return -self.Es[s]
+            # print("over: ", self.Es[s], self.game.g.playrecords.player, self.game.g.winner)
+            return self.Es[s], self.game.g.winner
 
         if s not in self.Ps:
             # leaf node
@@ -96,7 +97,7 @@ class MCTS():
 
             self.Vs[s] = valids
             self.Ns[s] = 0
-            return -v
+            return v, self.game.g.i
 
         valids = self.Vs[s]
         cur_best = -float('inf')
@@ -120,9 +121,12 @@ class MCTS():
         next_s, next_player = self.game.getNextState(canonicalBoard, 0, a)
         next_s = self.game.getCanonicalForm(next_s, next_player)
 
-        # 已经是之前模拟过的一步动作，则继续迭代
-        v = self.search(next_s)
-
+        # 已经是之前模拟过的动作，则继续迭代,模拟下一步
+        v, player = self.search(next_s)
+        win = (player_id == player) # 判断当前玩家是否是获胜
+        print("player: ", player_id, player, self.game.g.winner, v, win)
+        if not win:
+            v = -v
         if (s,a) in self.Qsa:
             # 统计胜负次数在所有模拟中占的比例来更新Q表
             self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + v)/(self.Nsa[(s,a)]+1)
@@ -133,4 +137,4 @@ class MCTS():
             self.Nsa[(s,a)] = 1
 
         self.Ns[s] += 1
-        return -v
+        return v, player
