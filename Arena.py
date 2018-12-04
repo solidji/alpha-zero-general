@@ -35,7 +35,7 @@ class Arena():
                 draw result returned from the game that is neither 1, -1, nor 0.
         """
         players = [self.player1, self.player2, self.player3]
-        curPlayer = 1
+        curPlayer = 0
         board = self.game.getInitBoard()
         it = 0
         while self.game.getGameEnded(board, curPlayer)==0:
@@ -44,7 +44,7 @@ class Arena():
                 assert(self.display)
                 print("Turn ", str(it), "Player ", str(curPlayer))
                 self.display(board)
-            action = players[curPlayer-1](self.game.getCanonicalForm(board, curPlayer))
+            action = players[curPlayer](self.game.getCanonicalForm(board, curPlayer))
 
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer),1)
 
