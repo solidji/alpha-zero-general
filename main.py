@@ -10,7 +10,7 @@ args = dotdict({
     'tempThreshold': 15,  # 模拟多少步之后，改取次数最多，而不是胜率最高的为best action
     'updateThreshold': 0.6,
     'maxlenOfQueue': 200000,
-    'numMCTSSims': 100,  # 往下探索多少步之后判断最佳策略
+    'numMCTSSims': 54,  # 往下探索多少步之后判断最佳策略,推荐25，54就肯定全部打完一局了
     'arenaCompare': 40,
     'cpuct': 1,
 

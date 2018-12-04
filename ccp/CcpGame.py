@@ -6,7 +6,8 @@ from ccp.actions import  action_dict
 
 class CcpGame(Game):
     def __init__(self):
-        self.g = Poker()
+        # self.g = Poker()
+        pass
 
     def getInitBoard(self):
         """
@@ -14,10 +15,12 @@ class CcpGame(Game):
         用records来表示状态，但保存和传给神经网络训练的，要从records中抽出state
         :return:
         """
+        g = Poker()
+
         # 发牌
-        self.g.game_start(self.g.players, self.g.playrecords, self.g.cards)
+        g.game_start(g.players, g.playrecords, g.cards)
         # state = get_state(self.g.playrecords, self.g.players[0])
-        return self.g.playrecords
+        return g.playrecords
 
     def getBoardSize(self):
         # 这里返回值用于确定神经网络输入域，应该是state的大小
@@ -28,16 +31,19 @@ class CcpGame(Game):
         return len(action_dict)+2
 
     def getNextState(self, board, player, action):
-        self.g.initFromRecords(board)
-        self.g.execute_move(action, player)
+        g = Poker()
+        b = copy.deepcopy(board)
+        g.initFromRecords(b)
+        g.execute_move(action, player)
 
-        return (self.g.playrecords, self.g.i)
+        return (g.playrecords, g.i)
 
     def getValidMoves(self, board, player):
-
-        self.g.initFromRecords(board)
-        next_move_types, next_moves = self.g.get_next_moves()
-        actions = get_actions(next_moves, self.g.last_move != "start")
+        g = Poker()
+        b = copy.deepcopy(board)
+        g.initFromRecords(b)
+        next_move_types, next_moves = g.get_next_moves()
+        actions = get_actions(next_moves, g.last_move != "start")
         # action to one-hot
         actions_one_hot = np.zeros(self.getActionSize())
         for k in range(len(actions)):
@@ -46,19 +52,24 @@ class CcpGame(Game):
         return actions_one_hot
 
     def getGameEnded(self, board, player):
-
-        self.g.initFromRecords(board)
-        return self.g.winner
+        g = Poker()
+        b = copy.deepcopy(board)
+        g.initFromRecords(b)
+        return g.winner
 
     def getCanonicalForm(self, board, player):
-        self.g.initFromRecords(board)
+        g = Poker()
+        b = copy.deepcopy(board)
+        g.initFromRecords(b)
         # state = get_state(board, board.player)
-        return board
+        return g.playrecords
 
     def getSymmetries(self, board, pi):
-        self.g.initFromRecords(board)
-        state = get_state(board, board.player)
-        l = [state, pi]
+        g = Poker()
+        b = copy.deepcopy(board)
+        g.initFromRecords(b)
+        state = get_state(b, b.player)
+        l = [(state, pi)]
         return l
 
     def stringRepresentation(self, board):

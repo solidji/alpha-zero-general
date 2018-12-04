@@ -598,7 +598,7 @@ class Player(object):
         '''
         # 主动调用一下，初始化self.next_move_types, self.next_moves
         self.get_moves(last_move_type, last_move, playrecords)
-        print(self.player_id, action)
+        # print("choose action: ", self.player_id, action)
         if action != None:
             if action == 429:
                 self.next_move_type = self.next_move = "buyao"
@@ -606,7 +606,7 @@ class Player(object):
                 self.next_move_type = self.next_move = "yaobuqi"
             else:
                 actions = get_actions(self.next_moves, False)
-                print(action, actions)
+                # print("in actions: ", action, actions)
                 for a in actions:
                     if a == action:
                         self.next_move = self.next_moves[actions.index(a)]
@@ -739,7 +739,7 @@ def get_state(playrecords, player):
     '''
     state = np.zeros((6, 15), dtype=int)
 
-    if player == 1:
+    if player == 1 or player == 0:
         for i in playrecords.cards_left1:
             state[0][i.rank - 1] += 1
         for cards in playrecords.next_move1:
