@@ -298,7 +298,7 @@ class PlayRecords(object):
         card_show(self.cards_left3, "player 3", 1)
         # card_show(self.records, "record", 3)
 
-    # 保存当前状态为np.array形态的上帝视角state
+    # 保存当前状态为np.array形态的当前玩家视角state
     def save_to_state(self):
         i = self.player % 3 + 1
         return get_state(self, i)

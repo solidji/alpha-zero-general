@@ -79,3 +79,5 @@ class CcpGame(Game):
         # state = get_state(board, board.player)
         return state.tostring()
 
+def display(board):
+    print(board.save_to_state())
