@@ -6,12 +6,12 @@ from utils import *
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 100,
+    'numEps': 2,
     'tempThreshold': 15,  # 模拟多少步之后，改取次数最多，而不是胜率最高的为best action
     'updateThreshold': 0.36, # 0.6*0.6
     'maxlenOfQueue': 200000,
-    'numMCTSSims': 25,  # 往下探索多少步之后判断最佳策略,推荐25，54就肯定全部打完一局了
-    'arenaCompare': 30,
+    'numMCTSSims': 15,  # 往下探索多少步之后判断最佳策略,推荐25，54就肯定全部打完一局了
+    'arenaCompare': 6,
     'cpuct': 1,
 
     'checkpoint': './temp/',

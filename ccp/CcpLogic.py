@@ -293,9 +293,30 @@ class PlayRecords(object):
     # 展示
     def show(self, info):
         print(info)
-        card_show(self.cards_left1, "player 1", 1)
-        card_show(self.cards_left2, "player 2", 1)
-        card_show(self.cards_left3, "player 3", 1)
+        state = np.zeros((4, 15), dtype=int)
+        for i in self.cards_left1:
+            state[0][i.rank - 1] += 1
+        for i in self.cards_left2:
+            state[1][i.rank - 1] += 1
+        for i in self.cards_left3:
+            state[2][i.rank - 1] += 1
+        print("cards_left1: ", state[0])
+        print("cards_left2: ", state[1])
+        print("cards_left3: ", state[2])
+
+        print("winner: ", self.winner)
+        game_record = []
+        for record in self.records:
+            game_record.append((record[0], record[1]))
+            if record[2] not in ["buyao", "yaobuqi"]:
+                cards = record[2]
+                for card in cards:
+                    game_record.append(card.name)
+        print(game_record)
+
+        # card_show(self.cards_left1, "player 1", 1)
+        # card_show(self.cards_left2, "player 2", 1)
+        # card_show(self.cards_left3, "player 3", 1)
         # card_show(self.records, "record", 3)
 
     # 保存当前状态为np.array形态的当前玩家视角state

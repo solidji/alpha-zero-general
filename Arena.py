@@ -37,6 +37,7 @@ class Arena():
         players = [self.player1, self.player2, self.player3]
         curPlayer = 0
         board = self.game.getInitBoard()
+        board.show("a new game start")
         it = 0
         while self.game.getGameEnded(board, curPlayer)==0:
             it+=1
@@ -56,6 +57,8 @@ class Arena():
             assert(self.display)
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
+
+        board.show("a new game end")
         return self.game.getGameEnded(board, 1)
 
     def playGames(self, num, verbose=False):
