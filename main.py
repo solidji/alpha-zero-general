@@ -5,8 +5,8 @@ from ccp.keras.NNet import NNetWrapper as nn
 from utils import *
 
 args = dotdict({
-    'numIters': 1000,
-    'numEps': 2,
+    'numIters': 10,
+    'numEps': 10,
     'tempThreshold': 15,  # 模拟多少步之后，改取次数最多，而不是胜率最高的为best action
     'updateThreshold': 0.36, # 0.6*0.6
     'maxlenOfQueue': 200000,
@@ -33,4 +33,5 @@ if __name__=="__main__":
     if args.load_model:
         print("Load trainExamples from file")
         c.loadTrainExamples()
-    c.learn()
+    # c.learn()
+    c.learnMulti()
