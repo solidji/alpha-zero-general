@@ -4,15 +4,18 @@ sys.path.append('..')
 from utils import *
 
 import argparse
-from keras.models import *
-from keras.layers import *
-from keras.optimizers import *
+# from keras.models import *
+# from keras.layers import *
+# from keras.optimizers import *
 
-from keras.utils import multi_gpu_model
+# from keras.utils import multi_gpu_model
 
 
 class CcpNNet():
     def __init__(self, game, args):
+        from keras.models import Model
+        from keras.layers import Input, Reshape, Activation, Conv2D, BatchNormalization, Flatten, Dropout, Dense
+        from keras.optimizers import Adam
         # game params
         self.board_x, self.board_y = game.getBoardSize()
         self.action_size = game.getActionSize()
