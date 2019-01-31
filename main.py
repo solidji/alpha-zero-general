@@ -21,17 +21,21 @@ args = dotdict({
     'numItersForTrainExamplesHistory': 20,
 
 })
-
+from myMain import Klass
 if __name__=="__main__":
-    g = Game()
-    nnet = nn(g)
-
-    if args.load_model:
-        nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
-
-    c = Coach(g, nnet, args)
-    if args.load_model:
-        print("Load trainExamples from file")
-        c.loadTrainExamples()
+    # g = Game()
+    # nnet = nn(g)
+    #
+    # if args.load_model:
+    #     nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+    #
+    # c = Coach(g, nnet, args)
+    # if args.load_model:
+    #     print("Load trainExamples from file")
+    #     c.loadTrainExamples()
     # c.learn()
-    c.learnMulti()
+    # c.learnMulti()
+    c = Coach(args)
+    c.run()
+    # _kls = Klass()
+    # _kls.run()

@@ -49,6 +49,7 @@ class Poker(object):
 
         if train:
             # 洗牌
+            np.random.seed()
             np.random.shuffle(cards.cards)
             # 排序
             p1_cards = cards.cards[:18]
@@ -62,6 +63,7 @@ class Poker(object):
             players[2].cards_left = playrecords.cards_left3 = p3_cards
         else:
             # 洗牌
+            np.random.seed()
             np.random.shuffle(cards.cards)
             # 排序
             p1_cards = cards.cards[:20]
