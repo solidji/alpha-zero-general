@@ -2,12 +2,13 @@ from collections import deque
 from Arena import Arena
 from MCTS import MCTS
 import numpy as np
-from pytorch_classification.utils import Bar, AverageMeter
+from pytorch_classification.utils import AverageMeter
 import time, os, sys
 from pickle import Pickler, Unpickler
 from random import shuffle
-
+from progress.bar import Bar
 from multiprocessing import Pool, Process, Queue, Manager
+
 from ccp.keras.NNet import NNetWrapper as nn
 from ccp.CcpGame import CcpGame as Game
 from utils import *
@@ -124,6 +125,7 @@ class Coach():
             # bookkeeping
             print('------ITER Multi' + str(i) + '------')
             # examples of the iteration
+
             if not self.skipFirstSelfPlay or i > 1:
                 iterationTrainExamples = deque([], maxlen=args.maxlenOfQueue)
 
@@ -190,6 +192,7 @@ class Coach():
             shuffle(trainExamples)
 
             # training new network, keeping a copy of the old one
+
             self.nnet.save_checkpoint(folder=args.checkpoint, filename='temp.pth.tar')
             self.pnet.load_checkpoint(folder=args.checkpoint, filename='temp.pth.tar')
             p1mcts = MCTS(self.game, self.pnet, args)

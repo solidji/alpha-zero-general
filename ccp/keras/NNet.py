@@ -18,8 +18,9 @@ args = dotdict({
     'dropout': 0.3,
     'epochs': 10,
     'batch_size': 64,
-    'cuda': False,
+    'cuda': True,
     'num_channels': 512,
+    'gpus': 4,
 })
 
 class NNetWrapper(NeuralNet):

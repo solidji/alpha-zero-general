@@ -10,18 +10,19 @@ args = dotdict({
     'tempThreshold': 15,  # 模拟多少步之后，改取次数最多，而不是胜率最高的为best action
     'updateThreshold': 0.36, # 0.6*0.6
     'maxlenOfQueue': 200000,
-    'numMCTSSims': 15,  # 往下探索多少步之后判断最佳策略,推荐25，54就肯定全部打完一局了
-    'arenaCompare': 6,
+    'numMCTSSims': 30,  # 往下探索多少步之后判断最佳策略,推荐25，54就肯定全部打完一局了
+    'pitThreshold': 10,
+    'arenaCompare': 30,
     'cpuct': 1,
 
     'checkpoint': './temp/',
     'load_model': False,
     # 'load_folder_file': ('/dev/models/8x100x50','best.pth.tar'),
-    'load_folder_file': ('./temp/', 'checkpoint_6.pth.tar'),
+    'load_folder_file': ('./temp/', 'checkpoint_3.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
 
 })
-from myMain import Klass
+
 if __name__=="__main__":
     # g = Game()
     # nnet = nn(g)
