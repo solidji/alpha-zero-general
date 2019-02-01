@@ -17,12 +17,12 @@ import types
 
 args = dotdict({
     'numIters': 10,
-    'numEps': 10,
+    'numEps': 100,
     'tempThreshold': 15,  # 模拟多少步之后，改取次数最多，而不是胜率最高的为best action
     'updateThreshold': 0.36, # 0.6*0.6
     'maxlenOfQueue': 200000,
     'numMCTSSims': 15,  # 往下探索多少步之后判断最佳策略,推荐25，54就肯定全部打完一局了
-    'arenaCompare': 6,
+    'arenaCompare': 3,
     'cpuct': 1,
 
     'checkpoint': './temp/',
@@ -123,7 +123,7 @@ class Coach():
 
         for i in range(1, args.numIters + 1):
             # bookkeeping
-            print('------ITER Multi' + str(i) + '------')
+            print('------ITER Multi ' + str(i) + '------')
             # examples of the iteration
 
             if not self.skipFirstSelfPlay or i > 1:
@@ -131,24 +131,24 @@ class Coach():
 
                 eps_time = AverageMeter()
                 bar = Bar('Self Play', max=args.numEps)
-                end_time = time.time()
+                end = time.time()
                 results = []
-                p = Pool(processes=10)
+                p = Pool()
 
-                def update(result):
-                    results.append(result)
-                    eps_time.update(time.time() - end_time)
-                    # end_time = time.time()
-                    bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(
-                        eps=eps + 1, maxeps=args.numEps, et=eps_time.avg,
-                        total=bar.elapsed_td, eta=bar.eta_td)
-                    bar.next()
+                # def update(result):
+                #     # results.append(result)
+                #     eps_time.update(time.time() - end_time)
+                #     # end_time = time.time()
+                #     bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(
+                #         eps=eps + 1, maxeps=args.numEps, et=eps_time.avg,
+                #         total=bar.elapsed_td, eta=bar.eta_td)
+                #     bar.next()
 
                 for eps in range(args.numEps):
                     # self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
                     # result = (p.apply_async(self, args=(self,)))
-                    p.apply_async(self.func, args=(eps, ), callback=update)
-                    # results.append(result)
+                    result = p.apply_async(self.func, args=(eps, ))
+                    results.append(result)
                     # iterationTrainExamples += self.executeEpisode()
 
                     # bookkeeping + plot progress
@@ -162,6 +162,11 @@ class Coach():
                 print('Waiting for all subprocesses done...')
                 p.close()
                 p.join()
+                eps_time.update(time.time() - end)
+                bar.suffix = '({eps}/{maxeps}) Eps Time: {et:.3f}s | Total: {total:} | ETA: {eta:}'.format(
+                        eps=9 + 1, maxeps=args.numEps, et=eps_time.avg,
+                        total=bar.elapsed_td, eta=bar.eta_td)
+                bar.next()
                 bar.finish()
                 print('All subprocesses done.')
                 for res in results:
@@ -373,5 +378,5 @@ class Coach():
 if __name__=="__main__":
     c = Coach()
     # c.run()
-    # c.learnMulti()
-    c.learn()
+    c.learnMulti()
+    # c.learn()
